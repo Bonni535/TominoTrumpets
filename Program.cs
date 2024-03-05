@@ -33,4 +33,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Create a Song (Post)
+app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
+{
+
+    db.Songs.Add(newSong);
+    db.SaveChanges();
+    return Results.Created($"/api/Songs/{newSong.Id}", newSong);
+});
+
+
 app.Run();
