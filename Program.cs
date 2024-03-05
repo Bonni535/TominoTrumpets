@@ -42,5 +42,18 @@ app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
     return Results.Created($"/api/Songs/{newSong.Id}", newSong);
 });
 
+//Delete a Song (Delete)
+app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
+{
+    var song = db.Songs.SingleOrDefault(s => s.Id == id);
+    if(song == null)
+    {
+        return Results.NotFound();
+    }
+    db.Songs.Remove(song);
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
 
 app.Run();
