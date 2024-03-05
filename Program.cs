@@ -55,5 +55,21 @@ app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
     return Results.NoContent();
 });
 
+//Update a Song (Put)
+app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int id) =>
+{
+    var updateSong = db.Songs.SingleOrDefault(s => s.Id == id);
+    if (updateSong == null)
+    {
+        return Results.NotFound();
+    }
+    updateSong.Title = song.Title;
+    updateSong.ArtistId = song.ArtistId;
+    updateSong.Album = song.Album;
+    updateSong.Length = song.Length;
+
+    db.SaveChanges();
+    return Results.Ok(updateSong);
+});
 
 app.Run();
