@@ -1,0 +1,6 @@
+@TominoTrumpets_HostAddress = http://localhost:5096
+
+GET {{TominoTrumpets_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
