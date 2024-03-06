@@ -39,7 +39,7 @@ app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
 
     db.Songs.Add(newSong);
     db.SaveChanges();
-    return Results.Created($"/api/Songs/{newSong.Id}", newSong);
+    return Results.Created($"/api/songs/{newSong.Id}", newSong);
 });
 
 //Delete a Song (Delete)
@@ -70,6 +70,12 @@ app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int id
 
     db.SaveChanges();
     return Results.Ok(updateSong);
+});
+
+//View a List of all the Songs
+app.MapGet("/api/songs", (TominoTrumpetsDbContext db) =>
+{
+    return db.Songs.ToList();
 });
 
 app.Run();
