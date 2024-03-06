@@ -43,7 +43,7 @@ app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
 });
 
 //Delete a Song (Delete)
-app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
+app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
 {
     var song = db.Songs.SingleOrDefault(s => s.Id == id);
     if(song == null)
@@ -56,7 +56,7 @@ app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
 });
 
 //Update a Song (Put)
-app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int id) =>
+app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id, Song song) =>
 {
     var updateSong = db.Songs.SingleOrDefault(s => s.Id == id);
     if (updateSong == null)
@@ -69,7 +69,7 @@ app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int id
     updateSong.Length = song.Length;
 
     db.SaveChanges();
-    return Results.Ok(updateSong);
+    return Results.Ok();
 });
 
 //View a List of all the Songs
@@ -88,7 +88,7 @@ app.MapPost("/api/artists", (TominoTrumpetsDbContext db, Artist newArtist) =>
 });
 
 // Delete an Artist
-app.MapDelete("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int id) =>
+app.MapDelete("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int artistId) =>
 {
     var artist = db.Artists.SingleOrDefault(a => a.Id == id);
     if(artist == null)
@@ -98,5 +98,21 @@ app.MapDelete("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int id) =>
     db.Artists.Remove(artist);
     db.SaveChanges();
     return Results.NoContent();
+});
+
+// Update an Artist
+app.MapPut("/api/artists/{artistsId}", (TominoTrumpetsDbContext db, int id, Artist artist) =>
+{
+    var updateArtist = db.Artists.SingleOrDefault(a => a.Id == id);
+    if (updateArtist == null)
+    {
+        return Results.NotFound();
+    }
+    updateArtist.Name = artist.Name;
+    updateArtist.Age = artist.Age;
+    updateArtist.Bio = artist.Bio;
+
+    db.SaveChanges();
+    return Results.Ok();
 });
 app.Run();
