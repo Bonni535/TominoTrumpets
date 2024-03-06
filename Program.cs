@@ -86,4 +86,17 @@ app.MapPost("/api/artists", (TominoTrumpetsDbContext db, Artist newArtist) =>
     db.SaveChanges();
     return Results.Created($"/api/artists/{newArtist.Id}", newArtist);
 });
+
+// Delete an Artist
+app.MapDelete("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int id) =>
+{
+    var artist = db.Artists.SingleOrDefault(a => a.Id == id);
+    if(artist == null)
+    {
+        return Results.NotFound();
+    }
+    db.Artists.Remove(artist);
+    db.SaveChanges();
+    return Results.NoContent();
+});
 app.Run();
