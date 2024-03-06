@@ -78,4 +78,12 @@ app.MapGet("/api/songs", (TominoTrumpetsDbContext db) =>
     return db.Songs.ToList();
 });
 
+
+// Create an Artist
+app.MapPost("/api/artists", (TominoTrumpetsDbContext db, Artist newArtist) =>
+{
+    db.Artists.Add(newArtist);
+    db.SaveChanges();
+    return Results.Created($"/api/artists/{newArtist.Id}", newArtist);
+});
 app.Run();
