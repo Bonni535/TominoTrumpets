@@ -34,26 +34,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Create a Song (Post)
-app.MapPost("/api/songs", (TominoTrumpetsDbContext db, int id, string title, int artistId, string album, int length) =>
+app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
 {
-    var newSong = new Song
-    {
-        Id = id,
-        Title = title,
-        ArtistId = artistId,
-        Album = album,
-        Length = length
-    };
-
     db.Songs.Add(newSong);
     db.SaveChanges();
     return Results.Created($"/api/songs/{newSong.Id}", newSong);
 });
 
 //Delete a Song (Delete)
-app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
+app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
 {
-    var song = db.Songs.SingleOrDefault(s => s.Id == songId);
+    var song = db.Songs.SingleOrDefault(s => s.Id == id);
 
     if(song == null)
     {
@@ -66,93 +57,45 @@ app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
 });
 
 //Update a Song (Put)
-app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, int artistId, string title, string album, int length ) =>
+app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int songId) =>
 {
-    var updateSong = db.Songs.SingleOrDefault(s => s.Id == artistId);
+    Song updateSong = db.Songs.SingleOrDefault(s => s.Id == songId);
     if (updateSong == null)
     {
         return Results.NotFound();
     }
-    updateSong.Title = title;
-    updateSong.ArtistId = artistId;
-    updateSong.Album = album;
-    updateSong.Length = length;
+    updateSong.Title = song.Title;
+    updateSong.ArtistId = song.ArtistId;
+    updateSong.Album = song.Album;
+    updateSong.Length = song.Length;
 
     db.SaveChanges();
-    return Results.Ok();
+    return Results.Created($"/api/songs/{song.Id}", song);
 });
 
 //View a List of all the Songs
 app.MapGet("/api/songs", (TominoTrumpetsDbContext db) =>
 {
-    var songs = db.Songs.ToList();
-
-    if (songs == null || songs.Count == 0) 
-    {
-        return Results.NotFound();
-    }
-
-
-    var response = songs.Select(song => new
-    {
-        id = song.Id,
-        title = song.Title,
-        album = song.Album,
-        length = song.Length,
-    });
-
-    return Results.Ok();
-    
+    return db.Songs.ToList();
 });
 
-//View all the Songs by Id
-app.MapGet("/api/sons/{songId}", (TominoTrumpetsDbContext db, int songId) =>
+//View all the Songs by Id and Include Artist and Genre
+app.MapGet("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
 {
-    var song = db.Songs
-    .Include(s => s.Artist)
-    .Include(s => s.Genres)
-    .FirstOrDefault(s => s.Id == songId);
+    var song = db.Songs.Include(s => s.Artist).Include(s => s.Genres).FirstOrDefault(s => s.Id == songId);
 
     if (song == null)
     {
         return Results.NotFound(songId);
     }
 
-    var response = new
-    {
-        id = song.Id,
-        title = song.Title,
-        artist = new
-        {
-            id = song.Artist.Id,
-            name = song.Artist.Name,
-            age = song.Artist.Age,
-            bio = song.Artist.Bio
-        },
-        album = song.Album,
-        length = song.Length,
-        genre = song.Genres.Select(genre => new
-        {
-            id = genre.Id,
-            description = genre.Description,
-        }).ToList()
-    };
-
     return Results.Ok();
 });
 
 
 // Create an Artist
-app.MapPost("/api/artists", (TominoTrumpetsDbContext db, int id, string name, int age, string bio) =>
+app.MapPost("/api/artists", (TominoTrumpetsDbContext db, Artist newArtist) =>
 {
-    var newArtist = new Artist
-    {
-        Id = id,
-        Name = name,
-        Age = age,
-        Bio = bio
-    };
-
     db.Artists.Add(newArtist);
     db.SaveChanges();
     return Results.Created($"/api/artists/{newArtist.Id}", newArtist);
@@ -172,39 +115,24 @@ app.MapDelete("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int artist
 });
 
 // Update an Artist
-app.MapPut("/api/artists/{artistId}", (TominoTrumpetsDbContext db, int artistId, string name, int age, string bio ) =>
+app.MapPut("/api/artists/{artistId}", (TominoTrumpetsDbContext db, Artist artist, int artistId ) =>
 {
     var updateArtist = db.Artists.SingleOrDefault(a => a.Id == artistId);
     if (updateArtist == null)
     {
         return Results.NotFound();
     }
-    updateArtist.Name = name;
-    updateArtist.Age = age;
-    updateArtist.Bio = bio;
+    updateArtist.Name = artist.Name;
+    updateArtist.Age = artist.Age;
+    updateArtist.Bio = artist.Bio;
 
     db.SaveChanges();
-    return Results.Ok();
+    return Results.Created($"/api/artists/artist.id", artist);
 });
 
 // View a List of All the Artists
 app.MapGet("/api/artists", (TominoTrumpetsDbContext db) =>
 {
-    var artists = db.Artists.ToList();
-
-    if (artists == null || artists.Count == 0)
-    {
-        return Results.NotFound();
-    }
-
-    var response = artists.Select(artist => new
-    {
-        id = artist.Id,
-        name = artist.Name,
-        age = artist.Age,
-        bio = artist.Bio,
-    });
-
-    return Results.Ok();
+   return db.Artists.ToList();
 });
 app.Run();
