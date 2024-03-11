@@ -33,6 +33,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+// Song Api Calls
+
 // Create a Song (Post)
 app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
 {
@@ -41,7 +44,7 @@ app.MapPost("/api/songs", (TominoTrumpetsDbContext db, Song newSong) =>
     return Results.Created($"/api/songs/{newSong.Id}", newSong);
 });
 
-//Delete a Song (Delete)
+// Delete a Song (Delete)
 app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
 {
     var song = db.Songs.SingleOrDefault(s => s.Id == id);
@@ -56,7 +59,7 @@ app.MapDelete("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
     return Results.NoContent();
 });
 
-//Update a Song (Put)
+// Update a Song (Put)
 app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int songId) =>
 {
     Song updateSong = db.Songs.SingleOrDefault(s => s.Id == songId);
@@ -73,13 +76,13 @@ app.MapPut("/api/songs/{songId}", (TominoTrumpetsDbContext db, Song song, int so
     return Results.Created($"/api/songs/{song.Id}", song);
 });
 
-//View a List of all the Songs
+// View a List of all the Songs
 app.MapGet("/api/songs", (TominoTrumpetsDbContext db) =>
 {
     return db.Songs.ToList();
 });
 
-//View all the Songs by Id and Include Artist and Genre
+// View all the Songs by Id and Include Artist and Genre
 app.MapGet("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
 {
     var song = db.Songs.Include(s => s.Artist).Include(s => s.Genres).FirstOrDefault(s => s.Id == songId);
@@ -92,6 +95,20 @@ app.MapGet("/api/songs/{songId}", (TominoTrumpetsDbContext db, int songId) =>
     return Results.Ok();
 });
 
+// Get all Songs and relative Artist and Genre
+app.MapGet("/api/songs/{songId}", (TominoTrumpetsDbContext db, int id) =>
+{
+    var SongArtistAndGenre = db.Songs.Include(s => s.Artist).Include(s => s.Genres).FirstOrDefault(s => s.Id == id);
+
+    if (SongArtistAndGenre == null) 
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok();
+});
+
+// Artist Api Calls
 
 // Create an Artist
 app.MapPost("/api/artists", (TominoTrumpetsDbContext db, Artist newArtist) =>
@@ -134,5 +151,56 @@ app.MapPut("/api/artists/{artistId}", (TominoTrumpetsDbContext db, Artist artist
 app.MapGet("/api/artists", (TominoTrumpetsDbContext db) =>
 {
    return db.Artists.ToList();
+});
+
+// Genre Api Calls
+
+// Get all Genres
+app.MapGet("/api/genres", (TominoTrumpetsDbContext db) =>
+{
+    return db.Genres.ToList();
+});
+
+// Create a New Genre
+app.MapPost("/api/genres", (TominoTrumpetsDbContext db, Genre newGenre) =>
+{
+    db.Genres.Add(newGenre);
+    db.SaveChanges();
+    return Results.Created($"/api/genre/{newGenre.Id}", newGenre);
+});
+
+// Update a Genre
+app.MapPut("/api/genres/{genreId}", (TominoTrumpetsDbContext db, Genre genre, int id) =>
+{
+    Genre genreUpdate = db.Genres.SingleOrDefault(g => genre.Id == id);
+    if (genreUpdate == null) 
+    {
+        return Results.NotFound();
+    }
+    genreUpdate.Description = genre.Description;
+    db.SaveChanges();
+    return Results.Created($"/api/genres/{genre.Id}", genre);
+});
+
+// Delete a Genre
+app.MapDelete("/api/genres/{genreId}", (TominoTrumpetsDbContext db, int id) =>
+{
+    var genre = db.Genres.SingleOrDefault(g => g.Id == id);
+    db.Genres.Remove(genre);
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
+// Get all the Songs related to a Genre
+app.MapGet("/api/genres/{genreId}", (TominoTrumpetsDbContext db, int id) =>
+{
+    var SongsWithGenreId = db.Genres.Where(s => s.Id == id).Include(g => g.Songs).ToList();
+
+    if (SongsWithGenreId == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok();
 });
 app.Run();
